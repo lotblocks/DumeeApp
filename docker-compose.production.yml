@@ -1,0 +1,292 @@
+# =================================
+# DUMEE SAAS PLATFORM - PRODUCTION DOCKER COMPOSE
+# =================================
+# Optimized production configuration with security and performance focus
+
+version: '3.8'
+
+services:
+  # =================================
+  # MAIN APPLICATION
+  # =================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.multi
+      target: prod-stage
+    image: dumee/app:${VERSION:-latest}
+    container_name: dumee-app
+    restart: unless-stopped
+    ports:
+      - "3080:3080"
+    depends_on:
+      - mongodb
+      - redis
+      - meilisearch
+    environment:
+      - NODE_ENV=production
+      - PORT=3080
+      - HOST=0.0.0.0
+    env_file:
+      - .env
+    volumes:
+      - ./uploads:/app/uploads:rw
+      - ./logs:/app/logs:rw
+      - dumee-images:/app/client/public/images:rw
+    networks:
+      - dumee-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    security_opt:
+      - no-new-privileges:true
+    user: "1000:1000"
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+
+  # =================================
+  # NGINX REVERSE PROXY
+  # =================================
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: dumee-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - app
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./logs/nginx:/var/log/nginx:rw
+    networks:
+      - dumee-network
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+
+  # =================================
+  # DATABASE SERVICES
+  # =================================
+  mongodb:
+    image: mongo:7.0
+    container_name: dumee-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: dumee
+    volumes:
+      - dumee-mongodb-data:/data/db:rw
+      - dumee-mongodb-config:/data/configdb:rw
+      - ./mongodb/mongod.conf:/etc/mongod.conf:ro
+      - ./backups:/backups:rw
+    networks:
+      - dumee-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    security_opt:
+      - no-new-privileges:true
+    user: "999:999"
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: dumee-redis
+    restart: unless-stopped
+    command: redis-server /etc/redis/redis.conf
+    volumes:
+      - dumee-redis-data:/data:rw
+      - ./redis/redis.conf:/etc/redis/redis.conf:ro
+    networks:
+      - dumee-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+    user: "999:999"
+
+  # =================================
+  # SEARCH ENGINE
+  # =================================
+  meilisearch:
+    image: getmeili/meilisearch:v1.12.3
+    container_name: dumee-meilisearch
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+      MEILI_NO_ANALYTICS: true
+      MEILI_ENV: production
+      MEILI_HTTP_ADDR: 0.0.0.0:7700
+    volumes:
+      - dumee-meilisearch-data:/meili_data:rw
+    networks:
+      - dumee-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:7700/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+
+  # =================================
+  # MONITORING & LOGGING
+  # =================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: dumee-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - dumee-prometheus-data:/prometheus:rw
+    networks:
+      - dumee-network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    security_opt:
+      - no-new-privileges:true
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: dumee-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_SECURITY_ADMIN_USER: admin
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - dumee-grafana-data:/var/lib/grafana:rw
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - dumee-network
+    depends_on:
+      - prometheus
+    security_opt:
+      - no-new-privileges:true
+
+  # =================================
+  # BACKUP SERVICE
+  # =================================
+  backup:
+    image: dumee/backup:${VERSION:-latest}
+    container_name: dumee-backup
+    restart: unless-stopped
+    environment:
+      BACKUP_FREQUENCY: daily
+      BACKUP_RETENTION_DAYS: 30
+      AWS_S3_BUCKET: ${BACKUP_S3_BUCKET}
+      AWS_ACCESS_KEY_ID: ${BACKUP_AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${BACKUP_AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - dumee-mongodb-data:/backup/mongodb:ro
+      - dumee-redis-data:/backup/redis:ro
+      - ./uploads:/backup/uploads:ro
+      - ./backups:/backups:rw
+    networks:
+      - dumee-network
+    depends_on:
+      - mongodb
+      - redis
+    security_opt:
+      - no-new-privileges:true
+
+# =================================
+# NETWORKS
+# =================================
+networks:
+  dumee-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# =================================
+# VOLUMES
+# =================================
+volumes:
+  dumee-mongodb-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH}/mongodb
+  
+  dumee-mongodb-config:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH}/mongodb-config
+
+  dumee-redis-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH}/redis
+
+  dumee-meilisearch-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH}/meilisearch
+
+  dumee-prometheus-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH}/prometheus
+
+  dumee-grafana-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH}/grafana
+
+  dumee-images:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH}/images
+
+# =================================
+# PRODUCTION DEPLOYMENT NOTES
+# =================================
+# 1. Set DATA_PATH environment variable to your data directory
+# 2. Configure SSL certificates in nginx/ssl/
+# 3. Set all required environment variables in .env
+# 4. Ensure proper file permissions on data directories
+# 5. Configure backup storage (AWS S3, Azure, etc.)
+# 6. Set up monitoring alerts and notifications
+# 7. Test disaster recovery procedures
+# 8. Regular security updates and dependency patches

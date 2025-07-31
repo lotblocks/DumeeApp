@@ -1,0 +1,198 @@
+/* Dumee Design System - LobeChat-inspired with meme personality */
+
+:root {
+  /* Primary Brand Colors - Playful gradient palette */
+  --dumee-primary-50: #f0f9ff;
+  --dumee-primary-100: #e0f2fe;
+  --dumee-primary-200: #bae6fd;
+  --dumee-primary-300: #7dd3fc;
+  --dumee-primary-400: #38bdf8;
+  --dumee-primary-500: #0ea5e9;
+  --dumee-primary-600: #0284c7;
+  --dumee-primary-700: #0369a1;
+  --dumee-primary-800: #075985;
+  --dumee-primary-900: #0c4a6e;
+
+  /* Secondary Colors - Purple accent */
+  --dumee-secondary-50: #faf5ff;
+  --dumee-secondary-100: #f3e8ff;
+  --dumee-secondary-200: #e9d5ff;
+  --dumee-secondary-300: #d8b4fe;
+  --dumee-secondary-400: #c084fc;
+  --dumee-secondary-500: #a855f7;
+  --dumee-secondary-600: #9333ea;
+  --dumee-secondary-700: #7c3aed;
+  --dumee-secondary-800: #6b21a8;
+  --dumee-secondary-900: #581c87;
+
+  /* Accent Colors - Fun & Playful */
+  --dumee-accent-yellow: #fbbf24;
+  --dumee-accent-green: #10b981;
+  --dumee-accent-pink: #ec4899;
+  --dumee-accent-orange: #f97316;
+
+  /* Background Gradients */
+  --dumee-gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #a855f7 100%);
+  --dumee-gradient-secondary: linear-gradient(135deg, #38bdf8 0%, #c084fc 100%);
+  --dumee-gradient-accent: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
+  --dumee-gradient-playful: linear-gradient(135deg, #10b981 0%, #38bdf8 50%, #a855f7 100%);
+
+  /* Smooth Transitions */
+  --dumee-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --dumee-transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --dumee-transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+  --dumee-transition-bounce: 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Border Radius - Soft & Modern */
+  --dumee-radius-sm: 0.5rem;
+  --dumee-radius-md: 0.75rem;
+  --dumee-radius-lg: 1rem;
+  --dumee-radius-xl: 1.5rem;
+  --dumee-radius-2xl: 2rem;
+  --dumee-radius-full: 9999px;
+
+  /* Shadows - Soft & Layered */
+  --dumee-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --dumee-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --dumee-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --dumee-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --dumee-shadow-glow: 0 0 20px rgba(168, 85, 247, 0.35);
+
+  /* Typography - Modern & Readable */
+  --dumee-font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --dumee-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --dumee-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] {
+  --dumee-gradient-primary: linear-gradient(135deg, #0284c7 0%, #7c3aed 100%);
+  --dumee-gradient-secondary: linear-gradient(135deg, #0ea5e9 0%, #9333ea 100%);
+  --dumee-shadow-glow: 0 0 30px rgba(168, 85, 247, 0.5);
+}
+
+/* Glass morphism effects */
+.dumee-glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .dumee-glass {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Gradient text */
+.dumee-gradient-text {
+  background: var(--dumee-gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Hover animations */
+.dumee-hover-lift {
+  transition: all var(--dumee-transition-base);
+}
+
+.dumee-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--dumee-shadow-lg);
+}
+
+/* Pulse animation for notifications */
+@keyframes dumee-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.dumee-pulse {
+  animation: dumee-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Bounce animation for fun elements */
+@keyframes dumee-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.dumee-bounce {
+  animation: dumee-bounce 1s ease-in-out infinite;
+}
+
+/* Gradient borders */
+.dumee-gradient-border {
+  position: relative;
+  background: linear-gradient(white, white) padding-box,
+              var(--dumee-gradient-primary) border-box;
+  border: 2px solid transparent;
+}
+
+.dark .dumee-gradient-border {
+  background: linear-gradient(#1f2937, #1f2937) padding-box,
+              var(--dumee-gradient-primary) border-box;
+}
+
+/* Emoji animations */
+@keyframes dumee-emoji-wave {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(20deg); }
+  75% { transform: rotate(-20deg); }
+}
+
+.dumee-emoji-wave {
+  display: inline-block;
+  animation: dumee-emoji-wave 1s ease-in-out;
+}
+
+.dumee-emoji-wave:hover {
+  animation-duration: 0.5s;
+  animation-iteration-count: infinite;
+}
+
+/* Custom scrollbar */
+.dumee-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dumee-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: var(--dumee-radius-full);
+}
+
+.dumee-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--dumee-gradient-primary);
+  border-radius: var(--dumee-radius-full);
+}
+
+.dumee-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--dumee-gradient-secondary);
+}
+
+/* Loading spinner with gradient */
+.dumee-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: transparent;
+  background: conic-gradient(from 180deg at 50% 50%, #0ea5e9 0deg, #a855f7 360deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), white calc(100% - 4px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), white calc(100% - 4px));
+  animation: dumee-spin 1s linear infinite;
+}
+
+@keyframes dumee-spin {
+  to { transform: rotate(360deg); }
+}

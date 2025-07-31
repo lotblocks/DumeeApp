@@ -1,0 +1,36 @@
+{
+  "name": "dumee-api",
+  "version": "0.7.9",
+  "description": "Dumee API server",
+  "type": "commonjs",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@dumee/api": "*",
+    "@dumee/data-schemas": "*",
+    "axios": "^1.8.2",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.0.3",
+    "express": "^4.21.2",
+    "express-mongo-sanitize": "^2.2.0",
+    "module-alias": "^2.2.3",
+    "passport": "^0.7.0",
+    "stripe": "^18.4.0"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "nodemon": "^3.1.10"
+  },
+  "_moduleAliases": {
+    "~": ".",
+    "@dumee/api": "../packages/api/dist",
+    "@dumee/data-schemas": "../packages/data-schemas/dist"
+  }
+}

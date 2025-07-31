@@ -1,0 +1,10 @@
+{{- if .Values.dumee.configYamlContent }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dumee.fullname" $ }}-config
+data:
+  dumee.yaml: |
+{{ .Values.dumee.configYamlContent | toYaml | indent 4 }}
+
+{{- end }}

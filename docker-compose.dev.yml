@@ -1,0 +1,99 @@
+version: '3.8'
+
+# Dumee Development Docker Compose
+# Use this for local development with hot reloading
+
+services:
+  dumee-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: dumee-dev-api
+    ports:
+      - "3080:3080"
+    volumes:
+      - ./api:/app/api:cached
+      - ./packages:/app/packages:cached
+      - ./dumee.yaml:/app/dumee.yaml:ro
+    environment:
+      - NODE_ENV=development
+      - HOST=0.0.0.0
+      - PORT=3080
+      - MONGO_URI=mongodb://mongodb:27017/Dumee
+      - MEILI_HOST=http://meilisearch:7700
+      - RAG_API_URL=http://rag_api:8000
+    depends_on:
+      - mongodb
+      - meilisearch
+    restart: unless-stopped
+    command: npm run backend:dev
+
+  dumee-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: dumee-dev-frontend
+    ports:
+      - "3090:3090"
+    volumes:
+      - ./client:/app/client:cached
+      - ./packages:/app/packages:cached
+    environment:
+      - NODE_ENV=development
+      - VITE_APP_TITLE=Dumee
+    restart: unless-stopped
+    command: npm run frontend:dev
+
+  mongodb:
+    image: mongo:7
+    container_name: dumee-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: Dumee
+    restart: unless-stopped
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.7.3
+    container_name: dumee-meilisearch
+    ports:
+      - "7700:7700"
+    volumes:
+      - meilisearch_data:/meili_data
+    environment:
+      - MEILI_NO_ANALYTICS=true
+      - MEILI_ENV=development
+      - MEILI_MASTER_KEY=development_key_change_in_production
+    restart: unless-stopped
+
+  rag_api:
+    image: ghcr.io/your-username/dumee-rag-api-dev-lite:latest
+    container_name: dumee-rag-api
+    ports:
+      - "8000:8000"
+    environment:
+      - RAG_PORT=8000
+      - DB_HOST=vectordb
+    depends_on:
+      - vectordb
+    restart: unless-stopped
+
+  vectordb:
+    image: ankane/pgvector:latest
+    container_name: dumee-vectordb
+    environment:
+      POSTGRES_DB: dumee_vectors
+      POSTGRES_USER: dumee
+      POSTGRES_PASSWORD: dumee_dev_password
+    volumes:
+      - vectordb_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+  meilisearch_data:
+  vectordb_data:

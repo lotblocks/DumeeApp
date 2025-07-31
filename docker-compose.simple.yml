@@ -1,0 +1,43 @@
+version: '3.8'
+
+# Dumee Quick Start Docker Compose
+# This version runs without complex builds
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:latest
+    container_name: dumee-mongodb
+    restart: always
+    volumes:
+      - ./data-node:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=Dumee
+    ports:
+      - "27017:27017"
+    command: mongod --noauth
+
+  # Meilisearch for search functionality
+  meilisearch:
+    image: getmeili/meilisearch:v1.12.3
+    container_name: dumee-meilisearch
+    restart: always
+    volumes:
+      - ./meili_data:/meili_data
+    environment:
+      - MEILI_HOST=http://meilisearch:7700
+      - MEILI_NO_ANALYTICS=true
+    ports:
+      - "7700:7700"
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:alpine
+    container_name: dumee-redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+networks:
+  default:
+    name: dumee-network

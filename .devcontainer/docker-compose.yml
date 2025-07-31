@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+  app:
+    build: 
+      context: ..
+      dockerfile: Dockerfile
+      target: builder
+    volumes:
+      - ..:/workspace:cached
+      - /workspace/node_modules
+      - /workspace/packages/*/node_modules
+      - /workspace/client/node_modules
+      - /workspace/api/node_modules
+    command: sleep infinity
+    user: node
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "3090:3090"
+      - "3080:3080"
+    
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: Dumee
+    
+  meilisearch:
+    image: getmeili/meilisearch:v1.7.3
+    restart: unless-stopped
+    ports:
+      - "7700:7700"
+    volumes:
+      - meilisearch_data:/meili_data
+    environment:
+      - MEILI_NO_ANALYTICS=true
+      - MEILI_ENV=development
+
+volumes:
+  mongodb_data:
+  meilisearch_data:

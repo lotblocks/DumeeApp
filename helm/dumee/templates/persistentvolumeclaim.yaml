@@ -1,0 +1,16 @@
+{{- if .Values.dumee.imageVolume.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "dumee.fullname" $ }}-images
+spec:
+  accessModes:
+    - {{ .Values.dumee.imageVolume.accessModes }}
+{{- if .Values.dumee.imageVolume.storageClassName }}
+  storageClassName: {{ .Values.dumee.imageVolume.storageClassName }}
+{{- end }}          
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: {{ .Values.dumee.imageVolume.size }}
+{{- end }}

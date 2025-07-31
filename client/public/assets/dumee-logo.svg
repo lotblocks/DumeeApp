@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="dumeeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="128" cy="128" r="120" fill="url(#dumeeGradient)" />
+  
+  <!-- Main Letter "D" -->
+  <path d="M 80 70 L 80 186 L 130 186 Q 170 186 170 128 Q 170 70 130 70 Z M 100 90 L 130 90 Q 150 90 150 128 Q 150 166 130 166 L 100 166 Z" fill="white" />
+  
+  <!-- Playful Elements -->
+  <!-- Emoji-style eyes -->
+  <circle cx="110" cy="110" r="8" fill="#fbbf24" />
+  <circle cx="140" cy="110" r="8" fill="#fbbf24" />
+  
+  <!-- Smile curve -->
+  <path d="M 105 140 Q 125 155 145 140" stroke="#fbbf24" stroke-width="4" fill="none" stroke-linecap="round" />
+  
+  <!-- Sparkle effects -->
+  <g fill="#fbbf24">
+    <polygon points="200,80 205,90 210,80 205,70" />
+    <polygon points="60,180 65,190 70,180 65,170" />
+    <polygon points="210,170 215,180 220,170 215,160" />
+    <polygon points="50,100 55,110 60,100 55,90" />
+  </g>
+  
+  <!-- Text "umee" -->
+  <text x="128" y="220" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#374151">umee</text>
+  
+  <!-- Subtitle -->
+  <text x="128" y="240" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#6b7280">I'm NO Dumee!</text>
+</svg> 
